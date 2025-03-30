@@ -10,17 +10,14 @@ class HiddenMarkovModel:
         if current_state not in self.transitions or not self.transitions[current_state]:
             return np.random.choice(self.states)
 
-        next_states, counts = zip(*self.transitions[current_state].items())
-        probabilities = np.array(counts) / sum(counts)
+        next_states = list(self.transitions[current_state].keys())
+        counts = list(self.transitions[current_state].values())
 
-        return np.random.choice(next_states, p=probabilities)
+        return np.random.choice(next_states, p=np.array(counts) / sum(counts))
 
     def learn_transition(self, state_from: str, state_to: str) -> None:
         if state_from not in self.transitions:
             self.transitions[state_from] = {}
-
-        if state_to not in self.transitions:
-            self.transitions[state_to] = {}
 
         if state_to not in self.transitions[state_from]:
             self.transitions[state_from][state_to] = 0
