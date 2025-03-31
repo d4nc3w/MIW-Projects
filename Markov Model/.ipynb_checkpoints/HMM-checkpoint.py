@@ -7,17 +7,17 @@ class HiddenMarkovModel:
         self.transitions = {}
 
     def predict_next_state(self, current_state: str) -> str:
-        if current_state not in self.transitions:
+        if current_state not in self.transitions or not self.transitions[current_state]:
             return np.random.choice(self.states)
 
-        return max(self.transitions[current_state], key=self.transitions[current_state].get)
+        next_states = list(self.transitions[current_state].keys())
+        counts = list(self.transitions[current_state].values())
+
+        return np.random.choice(next_states, p=np.array(counts) / sum(counts))
 
     def learn_transition(self, state_from: str, state_to: str) -> None:
         if state_from not in self.transitions:
             self.transitions[state_from] = {}
-
-        if state_to not in self.transitions:
-            self.transitions[state_to] = {}
 
         if state_to not in self.transitions[state_from]:
             self.transitions[state_from][state_to] = 0
@@ -46,8 +46,12 @@ model = HiddenMarkovModel(list(set(data)))
 for i in range(len(data) - 1):
     model.learn_transition(data[i], data[i + 1])
 
-print(model.generate_sentence(7))
-print(model.generate_sentence(10))
-print(model.generate_sentence(12))
-print(model.generate_sentence(4))
-print(model.generate_sentence(16))
+print(model.generate_sentence(8))
+print(model.generate_sentence(8))
+print(model.generate_sentence(8))
+print(model.generate_sentence(8))
+print(model.generate_sentence(8))
+print(model.generate_sentence(8))
+print(model.generate_sentence(8))
+print(model.generate_sentence(8))
+
