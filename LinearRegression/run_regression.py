@@ -15,14 +15,14 @@ def parse_args():
         raise ValueError('Cannot start without specified data csv files')
     return args
 
-def calculate_normal_equation(x, y):
+def calculate_normal_equation(x: int, y: int):
     tmp = x.T.dot(x)
-    tnp = np.linalg.inv(tmp)
+    tmp = np.linalg.inv(tmp)
     tmp = tmp.dot(x.T)
     theta_hat = tmp.dot(y)
     return theta_hat
 
-def calculate_hypothesis(x, theta):
+def calculate_hypothesis(x: int, theta):
     y_hat = theta.T.dot(x.T)
     return y_hat
 
@@ -35,6 +35,7 @@ def reshape_dataset(dataset: pd.DataFrame, window: int, prediction_currency: str
         prediction = dataset.iloc[i+window][prediction_currency]
 
         features = window_data.drop(columns=[prediction_currency]).values.flatten()
+
         x_list.append(features)
         y_list.append(prediction)
 
@@ -56,7 +57,7 @@ def main(args: argparse.Namespace)-> None:
     y_hat = calculate_hypothesis(X, theta_hat).flatten()
 
     plt.plot(y, label='True')
-    # plt.plot(y_hat, label='Predicted')
+    plt.plot(y_hat, label='Predicted')
     plt.xlabel('Time step')
     plt.ylabel(args.predicted_currency)
     plt.savefig("prediction.png")
