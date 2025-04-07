@@ -11,8 +11,6 @@ def parse_args():
     parser.add_argument('-p', '--predicted_currency', required=True, help='Predicted currency')
 
     args = parser.parse_args()
-    if not args.data:
-        raise ValueError('Cannot start without specified data csv files')
     return args
 
 def calculate_normal_equation(x: int, y: int):
@@ -26,29 +24,31 @@ def calculate_hypothesis(x: int, theta):
     y_hat = theta.T.dot(x.T)
     return y_hat
 
-def reshape_dataset(dataset: pd.DataFrame, window: int, prediction_currency: str):
-    x_list = []
-    y_list = []
+def generate_data(dataset: pd.DataFrame, window: int, prediction_currency: str):
+    feature_df = pd.DataFrame()
 
-    for i in range(len(dataset) - window):
-        window_data = dataset.iloc[i:i+window]
-        prediction = dataset.iloc[i+window][prediction_currency]
+    for i in range(window):
+        shifted = dataset.shift(-i)
+        for col in dataset.columns:
+            #if col != prediction_currency:
+            feature_df[f'{col}_t-{window-i}'] = shifted[col]
 
-        features = window_data.drop(columns=[prediction_currency]).values.flatten()
+    target = dataset[prediction_currency].shift(-window)
+    feature_df['target'] = target
 
-        x_list.append(features)
-        y_list.append(prediction)
+    feature_df.dropna(inplace=True)
 
-    x = np.array(x_list)
-    y = np.array(y_list).reshape(-1, 1)
-    return x, y
+    X = feature_df.drop(columns=['target']).values
+    y = feature_df['target'].values.reshape(-1, 1)
+
+    return X, y
 
 def main(args: argparse.Namespace)-> None:
     data = pd.read_csv(args.data)
     observation_window = args.observation_window
     currency = args.predicted_currency
 
-    X, y = reshape_dataset(data, observation_window, currency)
+    X, y = generate_data(data, observation_window, currency)
     X = np.c_[np.ones((X.shape[0], 1)), X]
     print(f"Shape of X: {X.shape}")
     print(f"Shape of y: {y.shape}")
@@ -66,5 +66,6 @@ def main(args: argparse.Namespace)-> None:
 if __name__ == '__main__':
     main(parse_args())
 
+#python run_regression.py --data dataset.csv --observation_window 3 --predicted_currency Monero
 
 

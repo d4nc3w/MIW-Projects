@@ -26,6 +26,7 @@ def calculate_hypothesis(X, theta):
     y = theta.T.dot(X.T)
     return y
 
+#-----------------------------------------------------------------
 NUMBER_OF_SAMPLES = 100
 NUMBER_OF_FEATURES = 1
 

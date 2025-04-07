@@ -7,8 +7,6 @@ def parse_args():
     parser.add_argument('-i', '--input', nargs='+', default=[], help='Input csv files')
 
     args = parser.parse_args()
-    if not args.input:
-        raise ValueError('Cannot start without specified input csv files')
     return args
 
 def main(args: argparse.Namespace)-> None:
