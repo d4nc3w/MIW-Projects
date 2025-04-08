@@ -20,26 +20,26 @@ def calculate_normal_equation(x: int, y: int):
     theta_hat = tmp.dot(y)
     return theta_hat
 
-def calculate_hypothesis(x: int, theta):
-    y_hat = theta.T.dot(x.T)
+def calculate_hypothesis(X: int, theta):
+    y_hat = theta.T.dot(X.T)
     return y_hat
 
 def generate_data(dataset: pd.DataFrame, window: int, prediction_currency: str):
-    feature_df = pd.DataFrame()
+    features = pd.DataFrame()
 
     for i in range(window):
         shifted = dataset.shift(-i)
         for col in dataset.columns:
             #if col != prediction_currency:
-            feature_df[f'{col}_t-{window-i}'] = shifted[col]
+            features[f'{col}_{window-i}'] = shifted[col]
 
     target = dataset[prediction_currency].shift(-window)
-    feature_df['target'] = target
+    features[prediction_currency] = target
 
-    feature_df.dropna(inplace=True)
+    features.dropna(inplace=True)
 
-    X = feature_df.drop(columns=['target']).values
-    y = feature_df['target'].values.reshape(-1, 1)
+    X = features.drop(columns=[prediction_currency]).values
+    y = features[prediction_currency].values.reshape(-1, 1)
 
     return X, y
 
@@ -66,6 +66,6 @@ def main(args: argparse.Namespace)-> None:
 if __name__ == '__main__':
     main(parse_args())
 
-#python run_regression.py --data dataset.csv --observation_window 3 --predicted_currency Monero
+# python run_regression.py --data dataset.csv --observation_window 3 --predicted_currency Monero
 
 
