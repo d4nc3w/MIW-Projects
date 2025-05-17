@@ -1,48 +1,48 @@
+import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-import numpy as np
+from sklearn.preprocessing import LabelEncoder
 
-def load_and_prepare_data(filepath, label_column_name=None):
-    df = pd.read_csv(filepath)
 
-    if label_column_name is None:
-        label_column = df.columns[-1]
-    else:
-        label_column = label_column_name
-    X_raw = df.drop(columns=[label_column])
-    y_raw = df[label_column]
+def prepare_data(input_file, output_file):
+    df = pd.read_csv(input_file)
+    le = LabelEncoder()
 
-    def label_encode_column(column):
-        unique_values = sorted(column.unique())
-        value_to_int = {val: idx for idx, val in enumerate(unique_values)}
-        return column.map(value_to_int).to_numpy()
+    for column in df.columns:
+        df[column] = le.fit_transform(df[column])
 
-    X_encoded = []
-    for col in X_raw.columns:
-        if pd.api.types.is_numeric_dtype(X_raw[col]):
-            X_encoded.append(X_raw[col].to_numpy())
-        else:
-            X_encoded.append(label_encode_column(X_raw[col]))
-    X = np.stack(X_encoded, axis=1)
-    y = label_encode_column(y_raw)
+    df.to_csv(output_file, index=False)
 
-    def encode_with_one_hot_encoding(values):
-        num_classes = len(np.unique(values))
-        return np.eye(num_classes)[values]
-    Y = encode_with_one_hot_encoding(y)
-    return X.T, Y.T
+prepare_data("gender/Transformed Data Set - Sheet1.csv", "dataset.csv")
+df = pd.read_csv("dataset.csv")
 
-X, Y = load_and_prepare_data("gender/trainSet.csv")
+X = df.drop("Gender", axis=1).to_numpy()
+y = df["Gender"].to_numpy()
 
 print(f"Shape of input: {X.shape}")
-print(f"Example of input: {X[:, 0]}")
+print(f"Example of input: {X[0,:]}")
+print(f"Shape of target: {y.shape}")
+print(f"Example of target: {y[0]}")
+
+def encode_with_one_hot_encoding(categorical_value):
+    num_of_classes = len(np.unique(categorical_value))
+    return np.eye(num_of_classes)[categorical_value]
+
+Y = encode_with_one_hot_encoding(y)
 print(f"Shape of target: {Y.shape}")
-print(f"Example of target: {Y[:, 0]}")
+print(f"Example of target: {Y[0]}")
 
 def extend_input_with_bias(network_input):
     bias_extension = np.ones(network_input.shape[1]).reshape(1, -1)
     network_input = np.vstack([bias_extension, network_input])
     return network_input
+
+X = X.T
+Y = Y.T
+print(f"Shape of input: {X.shape}")
+print(f"Example of input: {X[:,0]}")
+print(f"Shape of target: {Y.shape}")
+print(f"Example of target: {Y[:,0]}")
 
 def describe_data(data):
     return f'number of features is {data.shape[0]} and number of datapoint is {data.shape[1]}'
@@ -82,7 +82,6 @@ plt.plot(demo_x, demo_derivative, label='Derivative')
 plt.legend()
 plt.show()
 
-
 def feed_forward(network_input, network):
     layer_input = network_input
     responses = []
@@ -113,7 +112,7 @@ def backpropagate(network, responses, expected_output_layer_response):
     gradients = []
     error = responses[-1] - expected_output_layer_response
     for weights, response in zip(reversed(network), reversed(responses)):
-        gradient = error + unipolar_derivative(response)
+        gradient = error * unipolar_derivative(response)
         gradients.append(gradient)
         error = weights @ gradient
         error = error[1:,:]
@@ -161,11 +160,6 @@ def train_network(network, network_input, expected_output, learning_factor, epoc
     return network, np.asarray(mse_history)
 
 network = create_network(X.shape[0], Y.shape[0], [7, 6])
-network, mse_history = train_network(network, X, Y, 0.3, 10)
-plt.plot(mse_history)
-plt.show()
-
-network = create_network(X.shape[0], Y.shape[0], [7, 6])
-network, mse_history = train_network(network, X, Y, 0.001, 20)
+network, mse_history = train_network(network, X, Y, 0.05, 50)
 plt.plot(mse_history)
 plt.show()
