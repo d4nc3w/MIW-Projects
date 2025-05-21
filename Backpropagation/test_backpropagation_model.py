@@ -20,6 +20,6 @@ def test_model():
     accuracy = np.mean(y_pred_labels == y_true_labels)
     for i in range(X_test.shape[1]):
         print(f"Predicted = {y_pred_labels[i]}, Actual = {y_true_labels[i]}")
-    print(f"Accuracy: {accuracy * 100:2f}%")
+    print(f"Accuracy: {accuracy * 100}%")
 
 test_model()

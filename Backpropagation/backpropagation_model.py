@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 
-
 def prepare_data(input_file, output_file):
     df = pd.read_csv(input_file)
     le = LabelEncoder()
