@@ -1,0 +1,65 @@
+%atomy
+apple.
+pear.
+lime.
+potato.
+
+john.
+alice.
+florence.
+terry.
+
+%fakty
+food(apple).
+food(pear).
+food(lime).
+food(potato).
+
+person(john).
+person(alice).
+person(jerry).
+person(florence).
+person(terry).
+person(tommy).
+
+child(florence, john).
+child(florence, alice).
+child(jerry, john).
+child(jerry, alice).
+child(tommy, florence).
+child(tommy, terry).
+
+age(john, 73).
+age(alice, 69).
+age(florence, 48).
+age(terry, 26).
+age(tommy, 6).
+age(jerry, 43).
+
+%reguly ( ; - oznacza alternatywe , - oznacza koniukcję )
+parent(X,Y) :- child(Y,X).
+ancestor(X,Y) :- parent(X,Y); ( parent(X,Z), ancestor(Z,Y)).
+descendant(X,Y) :- ancestor(Y,X).
+married(X,Y) :- parent(X,Z), parent(Y,Z), X \= Y.
+older(X,Y) :- age(X,A), age(Y,B), A>B.
+
+/*
+ * Możliwe porównania
+ * 
+ * X := Y - równość
+ * X \= nierówność
+ * X < Y
+ * X > Y
+ * X =< Y
+ * X >= Y
+ * 
+ */
+
+likes(tommy, apple).
+likes(tommy, potato).
+likes(terry, pear).
+likes(X,Y) :- parent(Y,X); child(Y,X); married(Y,X).
+
+who_likes_to_eat_what :- food(Y), likes(X,Y), format('~w likes to eat ~w\n', [X,Y]), fail.
+
+
